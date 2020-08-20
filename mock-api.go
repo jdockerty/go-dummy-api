@@ -14,17 +14,6 @@ type HealthResponse struct {
 	StatusCode int
 }
 
-// User struct is a minimal representation of simple data from the JSONPlaceholder API, only partial data is retreived.
-type User struct {
-	ID       int `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-}
-
-// Users gives an intuitive way to reference a slice of User.
-type Users []User
-
 // OK is a helper function on providing the response for HealthResponse
 func (r *HealthResponse) OK() []byte {
 
@@ -42,6 +31,17 @@ func (r *HealthResponse) OK() []byte {
 
 }
 
+// User struct is a minimal representation of simple data from the JSONPlaceholder API, only partial data is retreived.
+type User struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+// Users gives an intuitive way to reference a slice of User.
+type Users []User
+
 // HealthHandler is the function which is executed upon a request being routed to /health
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -53,7 +53,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AllUsersHandler is executed when a request is routed to /users
-// This returns all 10 users within the JSONPlaceholder API, but with stripped down data that is only contained from the User struct. 
+// This returns all 10 users within the JSONPlaceholder API, but with stripped down data that is only contained from the User struct.
 func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	var users Users
@@ -76,7 +76,6 @@ func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	resp, _ := json.MarshalIndent(users, "", "\t")
 
 	w.Header().Set("Content-Type", "application/json")
-
 
 	w.Write(resp)
 }
