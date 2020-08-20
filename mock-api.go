@@ -8,11 +8,13 @@ import (
 	"net/http"
 )
 
+// HealthResponse provides a simple struct for providing a health check.
 type HealthResponse struct {
 	Message    string
 	StatusCode int
 }
 
+// User struct is a minimal representation of simple data from the JSONPlaceholder API, only partial data is retreived.
 type User struct {
 	ID       int `json:"id"`
 	Name     string `json:"name"`
@@ -20,8 +22,10 @@ type User struct {
 	Email    string `json:"email"`
 }
 
+// Users gives an intuitive way to reference a slice of User.
 type Users []User
 
+// OK is a helper function on providing the response for HealthResponse
 func (r *HealthResponse) OK() []byte {
 
 	resp := HealthResponse{
@@ -38,6 +42,7 @@ func (r *HealthResponse) OK() []byte {
 
 }
 
+// HealthHandler is the function which is executed upon a request being routed to /health
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response HealthResponse
@@ -47,6 +52,8 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// AllUsersHandler is executed when a request is routed to /users
+// This returns all 10 users within the JSONPlaceholder API, but with stripped down data that is only contained from the User struct. 
 func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	var users Users
