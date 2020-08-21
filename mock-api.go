@@ -34,10 +34,10 @@ func (r *HealthResponse) OK() []byte {
 
 // User struct is a minimal representation of simple data from the JSONPlaceholder API, only partial data is retreived.
 type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	ID       int    `json:"ID"`
+	Name     string `json:"Name"`
+	Username string `json:"Username"`
+	Email    string `json:"Email"`
 }
 
 // Users gives an intuitive way to reference a slice of User.
