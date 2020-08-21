@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
+	"fmt"
 	"net/http"
 )
 
@@ -80,11 +81,41 @@ func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+func SingleUserHandler(w http.ResponseWriter, r *http.Request) {
+
+	var user User
+	id := mux.Vars(r)["id"]
+	
+	endpointWithID := fmt.Sprintf("https://jsonplaceholder.typicode.com/users/%s", id)
+	userResp, err := http.Get(endpointWithID)
+	if err != nil {
+		log.Fatalf("/users/%s GET: error when retreiving response for %s\n%s", id, id, err.Error())
+	}
+
+	data, err := ioutil.ReadAll(userResp.Body)
+	if err != nil {
+		log.Fatalf("/users/%s read response: error when reading data into byte array\n%s", id, err.Error())
+	}
+
+	err = json.Unmarshal(data, &user)
+	if err != nil {
+		log.Fatalf("/users/%s unmarshal: error when unmarshaling user\n%s", id, err.Error())
+	}
+
+	resp, _ := json.MarshalIndent(user, "", "\t")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	w.Write(resp)
+
+}
+
 func main() {
 	log.Println("Running server...")
 	r := mux.NewRouter()
 	r.HandleFunc("/health", HealthHandler)
 	r.HandleFunc("/users", AllUsersHandler)
+	r.HandleFunc("/user/{id:[0-9]+}", SingleUserHandler)
 	http.Handle("/", r)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
