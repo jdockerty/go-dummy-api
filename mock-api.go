@@ -81,6 +81,8 @@ func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+// SingleUserHandler functions in a similar way to AllUsersHandler, except a single user is returned.
+// The specific user ID is retreived from the URL path.
 func SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user User
