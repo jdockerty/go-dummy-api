@@ -1,3 +1,4 @@
+# Using the latest golang Docker image within the GitLab runner.
 image: golang:latest
 
 variables:
@@ -14,11 +15,15 @@ before_script:
   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   - cd $GOPATH/src/$REPO_NAME
 
+# Define the 3 stages of the pipeline
 stages:
   - test
   - build
   - deploy
 
+
+# Naming is arbitrary, 'format' defines the test stage for formatting, vetting (finding useless code and suspicious constructs
+# through examining source code), and running the tests defined within the _test.go file(s).
 format:
   stage: test
   script:
@@ -26,10 +31,12 @@ format:
     - go vet $(go list ./... | grep -v /vendor/)
     - go test -race $(go list ./... | grep -v /vendor/)
 
+# Build the static binary.
 compile:
   stage: build
   script:
     - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mock-api
+  # The artifact is the output of the build, the static binary file.
   artifacts:
     paths:
       - mock-api
