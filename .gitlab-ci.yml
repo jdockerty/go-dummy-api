@@ -40,3 +40,6 @@ compile:
   artifacts:
     paths:
       - mock-api
+
+
+# Deploy is unused at present. Stages which are not explicitly outlined with jobs will not be run.
