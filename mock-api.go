@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
-	"fmt"
 	"net/http"
 )
 
@@ -87,7 +87,7 @@ func SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	id := mux.Vars(r)["id"]
-	
+
 	endpointWithID := fmt.Sprintf("https://jsonplaceholder.typicode.com/users/%s", id)
 	userResp, err := http.Get(endpointWithID)
 	if err != nil {
