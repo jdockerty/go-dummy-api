@@ -1,0 +1,8 @@
+# Ignore the GitLab CI configuration
+.gitlab-ci.yml
+
+# Ignore the markdown document.
+README.md
+
+# Ignore test files
+*_test.go

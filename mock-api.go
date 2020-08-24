@@ -117,7 +117,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/health", HealthHandler)
 	r.HandleFunc("/users", AllUsersHandler)
-	r.HandleFunc("/user/{id:[0-9]+}", SingleUserHandler)
+	r.HandleFunc("/users/{id:[0-9]+}", SingleUserHandler)
 	http.Handle("/", r)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
