@@ -3,14 +3,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
+
+	"github.com/gorilla/mux"
+)
+
+var (
+	apiID string
 )
 
 // HealthResponse provides a simple struct for providing a health check.
 type HealthResponse struct {
+	ID         string
 	Message    string
 	StatusCode int
 }
@@ -19,6 +27,7 @@ type HealthResponse struct {
 func (r *HealthResponse) OK() []byte {
 
 	resp := HealthResponse{
+		ID:         apiID,
 		Message:    "Success",
 		StatusCode: http.StatusOK,
 	}
@@ -30,6 +39,16 @@ func (r *HealthResponse) OK() []byte {
 
 	return responseJSON
 
+}
+
+// Helper function for identifying different APIs when running multiple instances
+// e.g. through a load balancer to verify routing or in different containers.
+func generateAPIID() string {
+	source := rand.NewSource(time.Now().UnixNano())
+    num := rand.New(source).Intn(5000)
+	apiID := fmt.Sprintf("api-%d", num)
+
+	return apiID
 }
 
 // User struct is a minimal representation of simple data from the JSONPlaceholder API, only partial data is retreived.
@@ -114,6 +133,9 @@ func SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	log.Println("Running server...")
+
+	apiID = generateAPIID()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/health", HealthHandler)
 	r.HandleFunc("/users", AllUsersHandler)
