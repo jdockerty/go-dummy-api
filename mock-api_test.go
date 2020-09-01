@@ -49,6 +49,7 @@ func ExampleHealthResponse() {
 
 	// Output:
 	// {
+	// 	"ID": "",
 	// 	"Message": "Success",
 	// 	"StatusCode": 200
 	// }
