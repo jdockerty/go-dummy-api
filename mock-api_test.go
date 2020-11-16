@@ -45,7 +45,7 @@ func ExampleHealthResponse() {
 
 	receivedResponse := response.Body.String()
 
-	fmt.Println(receivedResponse)
+	fmt.Println(receivedResponse) // ID is not set without running main, so it is expected to be empty.
 
 	// Output:
 	// {

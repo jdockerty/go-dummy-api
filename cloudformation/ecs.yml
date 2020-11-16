@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Test deployment to AWS ECS
+Parameters: 
+  Environment:
+    Description: Environment key parameter 
+    Type: String
+    Default: testing
+    AllowedValues:
+      - testing
+      - production
+    
+
+Resources: 
+  containerRegistry:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: !Join 
+        - "-"
+        - - !Ref Environment
+          - "fake-api"
+      Tags: 
+        - Key: Environment
+          Value: !Ref Environment
+
+  apiCluster:
+    Type: AWS::ECS::Cluster
+
+  apiService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - 'Listener'
+    Properties:
+      Cluster: !Ref apiCluster
+      DesiredCount: 1
+      ServiceName: api-service
+      LaunchType: EC2
+      LoadBalancers:
+        -
+          ContainerName: api-service
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ecsTG
+      TaskDefinition: !Ref apiTask
+
+  apiTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      ContainerDefinitions: 
+        - Name: api-service
+          Image: 225688671978.dkr.ecr.eu-west-2.amazonaws.com/testing-fake-api:latest
+          Memory: 128
+          PortMappings:
+            - ContainerPort: 8080
+
+
+  ecsTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      # HealthCheckEnabled: true
+      # HealthCheckIntervalSeconds: 30
+      # HealthCheckPath: /health
+      # HealthCheckPort: 8080
+      # HealthCheckProtocol: HTTP
+      # HealthCheckTimeoutSeconds: 60
+      Name: !Join 
+        - "-"
+        - - !Ref Environment
+          - "ecs-lb"
+      Port: 80
+      Protocol: HTTP
+      Tags: 
+        - Key: Environment
+          Value: !Ref Environment
+      # TargetGroupAttributes: 
+      #   - TargetGroupAttribute
+      # Targets: 
+      #   - TargetDescription
+      # TargetType: String
+      # UnhealthyThresholdCount: 4
+      VpcId: !Ref testVPC
+  myLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      Name: staging-lb
+      SecurityGroups: 
+        - !Ref ecsSG
+      Subnets: 
+        - !Ref subnetA
+        - !Ref subnetB        
+      Type: application
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ecsTG
+      LoadBalancerArn: !Ref myLB
+      Port: '80'
+      Protocol: HTTP
+  
+  # clusterLB:
+  #   Type: AWS::ElasticLoadBalancing::LoadBalancer
+  #   Properties:
+  #     SecurityGroups:
+  #       - !Ref ecsSG
+  #     Subnets:
+  #       - !Ref subnetA
+  #       - !Ref subnetB
+  #     Listeners:
+  #       - LoadBalancerPort: 80 
+  #         InstancePort: 8080
+  #         Protocol: HTTP
+  #         InstanceProtocol: HTTP
+  #     HealthCheck:
+  #       Target: HTTP:8080/health
+  #       HealthyThreshold: 2
+  #       Interval: 20
+  #       Timeout: 10
+  #       UnhealthyThreshold: 4 
+
+  testVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 192.168.0.0/16
+      EnableDnsSupport: true
+      Tags:
+        - Key: Env
+          Value: !Ref Environment
+  subnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-west-2a
+      VpcId: !Ref testVPC
+      CidrBlock: 192.168.0.0/24
+      Tags:
+        - Key: Env
+          Value: !Ref Environment
+  subnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-west-2b
+      VpcId: !Ref testVPC
+      CidrBlock: 192.168.1.0/24
+      Tags:
+        - Key: Env
+          Value: !Ref Environment
+  
+  ecsSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ecs-sg
+      GroupDescription: SG for ECS
+      VpcId: !Ref testVPC
+      SecurityGroupIngress:
+        - Description: Allow HTTP
+          CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+      SecurityGroupEgress:
+        - Description: All outbound
+          CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+      Tags:
+        - Key: Env
+          Value: !Ref Environment
+
+  RT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref testVPC
+  routeTableAssocName:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref subnetA
+      RouteTableId: !Ref RT
+  routeName:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Env
+          Value: !Ref Environment
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref testVPC
+      InternetGatewayId: !Ref IGW
