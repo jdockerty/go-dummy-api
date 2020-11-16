@@ -3,6 +3,8 @@ image: golang:latest
 
 variables:
   REPO_NAME: gitlab.com/jdockerty/go-mock-api
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
 
 # The problem is that to be able to use go get, one needs to put
 # the repository in the $GOPATH. So for example if your gitlab domain
@@ -32,14 +34,29 @@ format:
     - go test -race $(go list ./... | grep -v /vendor/)
 
 # Build the static binary.
-compile:
-  stage: build
-  script:
-    - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mock-api
-  # The artifact is the output of the build, the static binary file.
-  artifacts:
-    paths:
-      - mock-api
+# compile:
+#   stage: build
+#   script:
+#     - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mock-api
+#   # The artifact is the output of the build, the static binary file.
+#   artifacts:
+#     paths:
+#       - mock-api
 
+build_image:
+  stage: build
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t registry.gitlab.com/jdockerty/go-fake-api:latest .
+    - docker push registry.gitlab.com/jdockerty/go-fake-api:latest    
 
 # Deploy is unused at present. Stages which are not explicitly outlined with jobs will not be run.
+
+deployment:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  script:
+    - aws --version
