@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummy-api-deployment 
+  labels:
+    app: dummy-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dummy-api 
+  template:
+    metadata:
+      labels:
+        app: dummy-api
+    spec:
+      containers:
+      - name: api
+        image: jdockerty/dummy-api:latest 
+        ports:
+        - containerPort: 8080
+
