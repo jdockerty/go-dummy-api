@@ -6,10 +6,7 @@ stages:
 
 # Naming is arbitrary, 'format' defines the test stage for formatting, vetting (finding useless code and suspicious constructs
 # through examining source code), and running the tests defined within the _test.go file(s).
-format:
+run-tests:
   stage: test
   script:
-    - go fmt $(go list ./... | grep -v /vendor/)
-    - go vet $(go list ./... | grep -v /vendor/)
-    - go test -race $(go list ./... | grep -v /vendor/)
-
+    - go test -v -race ./...
