@@ -4,8 +4,7 @@ image: golang:latest
 stages:
   - test
 
-# Naming is arbitrary, 'format' defines the test stage for formatting, vetting (finding useless code and suspicious constructs
-# through examining source code), and running the tests defined within the _test.go file(s).
+# Run the tests within *_test.go files. Uses verbose output and race condition flags.
 run-tests:
   stage: test
   script:
