@@ -9,3 +9,4 @@ The available routes are:
 * '/users' will return a list of all users, this piggybacks from the `jsonplaceholder` API to provide a list of random users attached to other data.
 * '/user/<user_id>' will return the data for a single user, specified by ID.
 
+The server listens for requests on port 8080.
