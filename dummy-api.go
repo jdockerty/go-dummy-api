@@ -45,7 +45,7 @@ func (r *HealthResponse) OK() []byte {
 // e.g. through a load balancer to verify routing or in different containers.
 func generateAPIID() string {
 	source := rand.NewSource(time.Now().UnixNano())
-    num := rand.New(source).Intn(5000)
+	num := rand.New(source).Intn(5000)
 	apiID := fmt.Sprintf("api-%d", num)
 
 	return apiID
