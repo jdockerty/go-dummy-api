@@ -4,16 +4,30 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+
 	"math/rand"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jdockerty/go-dummy-api/logger"
+	log "github.com/sirupsen/logrus"
 )
 
+// func Run() {
+// 	log.SetFormatter(&log.JSONFormatter{})
+
+// 	fields := log.Fields{
+// 		"ID":  "",
+// 		"app": "dummy-api",
+// 	}
+
+// 	log.WithFields(fields).WithFields(log.Fields{"string": "foo"}).Info("Event from Logger.")
+// }
+
 var (
-	apiID string
+	apiID    string
+	myLogger *logger.Logger
 )
 
 // HealthResponse provides a simple struct for providing a health check.
@@ -26,6 +40,8 @@ type HealthResponse struct {
 // OK is a helper function on providing the response for HealthResponse
 func (r *HealthResponse) OK() []byte {
 
+	myLogger.DebugAPIMessage(apiID, "request received on /health")
+
 	resp := HealthResponse{
 		ID:         apiID,
 		Message:    "Success",
@@ -36,7 +52,8 @@ func (r *HealthResponse) OK() []byte {
 	if err != nil {
 		log.Fatalf("json populate: error when marshaling json response\n%s", err.Error())
 	}
-
+	
+	myLogger.DebugAPIMessage(apiID, "returned a response to /health")
 	return responseJSON
 
 }
@@ -44,10 +61,13 @@ func (r *HealthResponse) OK() []byte {
 // Helper function for identifying different APIs when running multiple instances
 // e.g. through a load balancer to verify routing or in different containers.
 func generateAPIID() string {
+	myLogger.Debug("Generating API ID")
+
 	source := rand.NewSource(time.Now().UnixNano())
 	num := rand.New(source).Intn(5000)
 	apiID := fmt.Sprintf("api-%d", num)
 
+	myLogger.DebugAPIMessage(apiID, "Generated API ID")
 	return apiID
 }
 
@@ -78,6 +98,8 @@ func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	var users Users
 
+	myLogger.DebugAPIMessage(apiID, "starting all users request")
+
 	usersResponse, err := http.Get("https://jsonplaceholder.typicode.com/users")
 	if err != nil {
 		log.Fatalf("/users GET: error when retreiving response for all users\n%s", err.Error())
@@ -98,6 +120,8 @@ func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.Write(resp)
+
+	myLogger.DebugAPIMessage(apiID, "response sent for all users")
 }
 
 // SingleUserHandler functions in a similar way to AllUsersHandler, except a single user is returned.
@@ -106,6 +130,9 @@ func SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	id := mux.Vars(r)["id"]
+
+	logMsg := fmt.Sprintf("request for /users/%s", id)
+	myLogger.DebugAPIMessage(apiID, logMsg)
 
 	endpointWithID := fmt.Sprintf("https://jsonplaceholder.typicode.com/users/%s", id)
 	userResp, err := http.Get(endpointWithID)
@@ -129,10 +156,14 @@ func SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(resp)
 
+	logMsg = fmt.Sprintf("request sent for %s", id)
+	myLogger.DebugAPIMessage(apiID, logMsg)
 }
 
 func main() {
-	log.Println("Running server...")
+
+	myLogger = logger.New()
+	myLogger.Info("Running server")
 
 	apiID = generateAPIID()
 
