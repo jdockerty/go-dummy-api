@@ -7,9 +7,8 @@ README.md
 # Ignore test files
 *_test.go
 
-# Ignore Go module files.
-go.mod
-go.sum
+# Ignore local log files
+*.log
 
 # Ignore the Docker related files.
 .dockerignore

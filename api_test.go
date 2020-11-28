@@ -9,6 +9,14 @@ import (
 	"testing"
 )
 
+var (
+	api API
+)
+
+func init() {
+	api.ID = "api-0001"
+}
+
 func TestHealthHandler(t *testing.T) {
 	request, err := http.NewRequest(http.MethodGet, "/health", nil)
 	if err != nil {
@@ -17,7 +25,9 @@ func TestHealthHandler(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	HealthHandler(response, request)
+	api := NewAPI()
+
+	api.HealthHandler(response, request)
 
 	receivedResponse := response.Body.Bytes()
 
@@ -40,8 +50,7 @@ func ExampleHealthResponse() {
 	}
 
 	response := httptest.NewRecorder()
-
-	HealthHandler(response, request)
+	api.HealthHandler(response, request)
 
 	receivedResponse := response.Body.String()
 
@@ -49,7 +58,7 @@ func ExampleHealthResponse() {
 
 	// Output:
 	// {
-	// 	"ID": "",
+	// 	"ID": "api-0001",
 	// 	"Message": "Success",
 	// 	"StatusCode": 200
 	// }
