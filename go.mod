@@ -1,4 +1,4 @@
-module github.com/jdockerty/go-mock-app
+module github.com/jdockerty/go-dummy-api
 
 go 1.13
 
