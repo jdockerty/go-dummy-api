@@ -1,9 +1,11 @@
 # STAGE ONE
-FROM golang:onbuild as builder
+FROM golang:1.15 as builder
 
 LABEL description="A dummy API that wraps a 'jsonplaceholder' for testing/learning various services."
 
-WORKDIR /build
+WORKDIR /go/src/github.com/jdockerty/go-dummy-api/
+
+
 # Copy appropriate golang files into the working directory
 # This ignores the files contained within the .dockerignore file
 COPY . . 
@@ -18,7 +20,7 @@ FROM alpine:latest
 WORKDIR /api
 
 # Using previous stage to grab binary file into current stage
-COPY --from=builder /build/dummy-api .
+COPY --from=builder /go/src/github.com/jdockerty/go-dummy-api/ .
 
 # For documentation only, this lets the reader know that the application exposes port 8080
 # which can then be mapped from the container port to the host with the command
