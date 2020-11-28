@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jdockerty/go-dummy-api/logger"
 )
 
 // API is a simple struct to provide access to an internal ID for the running server.
@@ -24,7 +25,7 @@ func (api *API) Listen() {
 
 // HealthHandler is the function which is executed upon a request being routed to /health
 func (api *API) HealthHandler(w http.ResponseWriter, r *http.Request) {
-
+	myLogger := logger.New()
 	myLogger.InfoAPIMessage(api.ID, "request received on /health")
 	resp := HealthResponse{
 		ID:         api.ID,
@@ -47,6 +48,7 @@ func (api *API) HealthHandler(w http.ResponseWriter, r *http.Request) {
 // This returns all 10 users within the JSONPlaceholder API, but with stripped down data that is only contained from the User struct.
 func (api *API) AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var users Users
+	myLogger := logger.New()
 
 	myLogger.InfoAPIMessage(api.ID, "starting all users request")
 
@@ -80,7 +82,7 @@ func (api *API) SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	id := mux.Vars(r)["id"]
-
+	myLogger := logger.New()
 	logMsg := fmt.Sprintf("request for /users/%s", id)
 	myLogger.InfoAPIMessage(api.ID, logMsg)
 
@@ -113,6 +115,7 @@ func (api *API) SingleUserHandler(w http.ResponseWriter, r *http.Request) {
 // Helper function for identifying different APIs when running multiple instances
 // e.g. through a load balancer to verify routing or in different containers.
 func makeID() string {
+	myLogger := logger.New()
 	myLogger.Debug("Generating API ID")
 
 	source := rand.NewSource(time.Now().UnixNano())
@@ -123,7 +126,7 @@ func makeID() string {
 	return apiID
 }
 
-// NewAPI does stuff
+// NewAPI creates an instance of the API, it is invoked using the Listen() method.
 func NewAPI() *API {
 	api := new(API)
 	newID := makeID()
