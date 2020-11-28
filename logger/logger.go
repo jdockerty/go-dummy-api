@@ -7,23 +7,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// var (
-// 	logwrapper LogWrap
-// )
-
-// type Event struct {
-// 	id      string
-// 	message string
-// }
-
+// Logger is a wrapper struct around the logrus package.
 type Logger struct {
 	*logrus.Logger
 }
 
+// DebugAPIMessage writes an API ID into the logger, under debug level.
 func(l *Logger) DebugAPIMessage(apiId, msg string) {
 	l.WithField("id", apiId).Debug(msg)
 } 
 
+// New returns a new Logger, which wraps logrus.
 func New() *Logger {
 
 	baseLogrus := logrus.New()
