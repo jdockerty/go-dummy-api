@@ -4,9 +4,9 @@ import (
 	"github.com/jdockerty/go-dummy-api/logger"
 )
 
-var (
-	myLogger *logger.Logger
-)
+// var (
+// 	myLogger *logger.Logger
+// )
 
 // HealthResponse provides a simple struct for providing a health check.
 type HealthResponse struct {
@@ -28,7 +28,7 @@ type Users []User
 
 func main() {
 
-	myLogger = logger.New()
+	myLogger := logger.New()
 	myLogger.Info("Running server")
 
 	api := NewAPI()
